@@ -166,10 +166,12 @@ An identifier proves **control of a key**. It proves nothing about the agent's r
 ### 3.3 Exchange identifier
 
 ```
-did:web:aiexchange.pppa.lv
+did:web:pppa.lv
 ```
 
 PPPA MUST control the associated policy, signing authority and key management, including where technical components are operated under contract.
+
+The DID document declares distinct verification methods for distinct purposes. A key used to sign name-resolution responses **MUST NOT** be the key used to sign accreditation credentials: compromise of a discovery service must not become the power to forge accreditation.
 
 ### 3.4 Namespace ownership
 
@@ -614,7 +616,15 @@ A pilot MUST pin: MCP specification version; profile version; MCPF version; cred
 
 ## 19. Discovery and registries
 
-Three registry functions, deliberately separate.
+Three functions, deliberately separate. They answer different questions, they carry different authority, and they **MUST NOT** be merged into one service.
+
+| | Answers | Authority |
+|---|---|---|
+| **Agent naming (ANS)** | *Where is agent X, and what can it do?* | The participant, for names under its own domain |
+| **MCP server catalogue** | *What MCP services exist, and where are their manifests?* | Self-declared by the participant; a listing, not a judgement |
+| **Trust Registry** | *Is this organisation accredited, at what assurance level, with what status?* | **PPPA** |
+
+Only the Trust Registry carries accreditation. A name that resolves, and a service that appears in a catalogue, assert **nothing** about trust (§2.4). Conversely, withdrawal of accreditation (§8.4) is a Trust Registry act; it is not, and must not be, a naming act. A naming service that could also withdraw recognition would be a gatekeeper over existence, which this profile does not permit.
 
 ### 19.1 The participant's registry is authoritative
 
@@ -624,9 +634,11 @@ An organisation may maintain a private internal agent inventory and publish a di
 
 ### 19.2 The PPPA Trust Registry
 
-The PPPA Trust Registry is authoritative **only** for Exchange-level facts: which organisations are admitted, at what assurance level, with what current status, supporting which profile versions, and with what conformity result.
+The PPPA Trust Registry is authoritative **only** for Exchange-level facts about **organisations**: registration number, organisation DID, declared roles, assurance level, profile version, conformity result, the reliance statement (§14.2), validity dates, and current status.
 
-It is a **federation directory. It is not a registry of agents.**
+It is a **register of accredited organisations. It is not a registry of agents, and it is not a service catalogue.**
+
+The Trust Registry MUST be published **signed and mirrorable**, so that a verifier can hold a local copy and continue to verify accreditation without reaching PPPA at request time. PPPA's availability must never be a runtime dependency of any participant (§2.2).
 
 The registry MUST distinguish clearly between: listed, verified, accredited, suspended, withdrawn, and expired.
 
@@ -759,12 +771,31 @@ AI LV Exchange is **a network of trust, not a central database.**
 
 Stated openly, and tracked as issues in this repository.
 
-1. **PPPA trust anchor, Trust Registry and status list are not yet in production.** Until they are, nodes can reach MCPF L2 independently; **L3 depends on PPPA**.
-2. **No published conformance test suite.** Conformity is a registry flag until one exists. Annex B.6 defines the interim acceptance procedure.
-3. **Key compromise runbook** — the rotation policy is defined (§4.4); the incident runbook is not.
-4. **In-flight mandates on withdrawal** — behaviour of a mandate mid-transaction when accreditation is withdrawn is unspecified.
+### 24.1 Infrastructure status
+
+| Component | Status |
+|---|---|
+| `did:web:pppa.lv` — Exchange trust anchor | **Live** |
+| ANS resolver — agent naming, signed responses | **Live** |
+| MCP server catalogue | **Live** |
+| A2A endpoint | **Live** |
+| **Credential issuer** — signs `ExchangeParticipantCredential` | **Not yet in production** |
+| **StatusList2021** for participant credentials | **Not yet in production** |
+| **Trust Registry** — accredited organisations, assurance level, status | **Not yet in production** |
+| **PPPA challenge endpoint** (`/.well-known/mcp/challenge`) | **Not yet in production** |
+
+Consequently: a node can reach **MCPF L2 today, independently of PPPA** — the challenge endpoint, DID document and manifest are entirely within the participant's own control. **L3 requires the issuer, the status list and the Trust Registry**, and therefore depends on PPPA.
+
+The Trust Registry is a distinct component and cannot be derived from the naming service or the service catalogue: neither holds an assurance level, a registration number, a conformity result, or an accreditation status that can be withdrawn (§19).
+
+### 24.2 Specification gaps
+
+1. **No published conformance test suite.** Conformity is a registry flag until one exists. Annex B.5 defines the interim acceptance procedure.
+2. **Key separation.** The DID document must declare distinct verification methods for name-resolution signing and for credential issuance (§3.3). Until it does, compromise of the discovery service would be compromise of accreditation.
+3. **Key compromise runbook** — rotation policy is defined (§4.4); the incident runbook is not.
+4. **In-flight mandates on withdrawal** — the behaviour of a mandate mid-transaction when accreditation is withdrawn is unspecified.
 5. **PPPA's liability for a reliance statement** (§14.2) — narrower than liability for an attestation, but not yet settled with counsel.
-6. **Personal-agent provider accreditation criteria** (§21.3) — the role is defined; the detailed evidence and audit requirements for accrediting a provider are not yet written.
+6. **Personal-agent provider accreditation criteria** (§21.3) — the role is defined; the evidence and audit requirements for accrediting a provider are not yet written.
 7. **Migration path** to VC Data Model 2.0 and BitstringStatusList, pending interoperability review.
 
 ---
@@ -822,7 +853,7 @@ Published at `https://mcp.{organisation-domain}/.well-known/mcp-node.json`.
   },
   "discovery": {
     "agentNamespace": "agents.paraugs.lv",
-    "trustRegistryEntry": "https://aiexchange.pppa.lv/registry/paraugs"
+    "trustRegistryEntry": "https://registry.pppa.lv/paraugs"
   },
   "crypto": {
     "signing": ["Ed25519"],
@@ -891,7 +922,7 @@ PPPA resolves the record, confirms the token, and records the result. The token 
 
 ### B.2.2 What PPPA creates on its own infrastructure
 
-**1. Trust Registry entry** at `https://aiexchange.pppa.lv/registry/paraugs`:
+**1. Trust Registry entry** at `https://registry.pppa.lv/paraugs`:
 
 ```json
 {
@@ -903,14 +934,14 @@ PPPA resolves the record, confirms the token, and records the result. The token 
   "profileVersion": "0.2",
   "mcpfLevel": "L3",
   "conformity": "passed",
-  "conformityReport": "https://aiexchange.pppa.lv/reports/paraugs-2026-07.json",
+  "conformityReport": "https://registry.pppa.lv/reports/paraugs-2026-07.json",
   "status": "accredited",
   "admitted": "2026-07-20T00:00:00Z",
   "expires": "2027-07-20T00:00:00Z"
 }
 ```
 
-**2. ExchangeParticipantCredential**, signed by `did:web:aiexchange.pppa.lv`:
+**2. ExchangeParticipantCredential**, signed by `did:web:pppa.lv`:
 
 ```json
 {
@@ -919,7 +950,7 @@ PPPA resolves the record, confirms the token, and records the result. The token 
     "https://aiexchange.pppa.lv/schemas/v0.2"
   ],
   "type": ["VerifiableCredential", "ExchangeParticipantCredential"],
-  "issuer": "did:web:aiexchange.pppa.lv",
+  "issuer": "did:web:pppa.lv",
   "issuanceDate": "2026-07-20T00:00:00Z",
   "expirationDate": "2027-07-20T00:00:00Z",
   "credentialSubject": {
@@ -931,31 +962,31 @@ PPPA resolves the record, confirms the token, and records the result. The token 
     "profileVersion": "0.2"
   },
   "credentialStatus": {
-    "id": "https://aiexchange.pppa.lv/status/participants/1#17",
+    "id": "https://pppa.lv/status/participants/1#17",
     "type": "StatusList2021Entry",
     "statusPurpose": "revocation",
     "statusListIndex": "17",
-    "statusListCredential": "https://aiexchange.pppa.lv/status/participants/1"
+    "statusListCredential": "https://pppa.lv/status/participants/1"
   },
   "proof": {
     "type": "Ed25519Signature2020",
-    "verificationMethod": "did:web:aiexchange.pppa.lv#key-1",
+    "verificationMethod": "did:web:pppa.lv#key-1",
     "proofPurpose": "assertionMethod",
     "proofValue": "z58DAdFfa9SkqZMVP..."
   }
 }
 ```
 
-**3. Participant status list** at `https://aiexchange.pppa.lv/status/participants/1` — a StatusList2021 credential; index 17 is allocated to Paraugs and set to `0` (valid).
+**3. Participant status list** at `https://pppa.lv/status/participants/1` — a StatusList2021 credential; index 17 is allocated to Paraugs and set to `0` (valid).
 
 PPPA's own trust anchor surface, required once, serves every participant:
 
 ```
-https://aiexchange.pppa.lv/.well-known/did.json
-https://aiexchange.pppa.lv/.well-known/jwks.json
-https://aiexchange.pppa.lv/.well-known/mcp/challenge
-https://aiexchange.pppa.lv/status/participants/1
-https://aiexchange.pppa.lv/registry/{slug}
+https://pppa.lv/.well-known/did.json
+https://pppa.lv/.well-known/jwks.json
+https://pppa.lv/.well-known/mcp/challenge
+https://pppa.lv/status/participants/1
+https://registry.pppa.lv/{slug}
 ```
 
 The credential is delivered to Paraugs, which hosts it on **its own** domain. PPPA does not host participants' credentials.
@@ -1105,7 +1136,7 @@ Both expose the mandatory `identify` tool, unauthenticated.
                    "registry-verified", "ai-lv-exchange-0.2"]
   },
   "credentials": {
-    "issuer": "did:web:aiexchange.pppa.lv",
+    "issuer": "did:web:pppa.lv",
     "type": ["VerifiableCredential", "ExchangeParticipantCredential"],
     "subject": "did:web:mcp.paraugs.lv",
     "credential_url": "https://mcp.paraugs.lv/credentials/participant.json"
@@ -1116,7 +1147,7 @@ Both expose the mandatory `identify` tool, unauthenticated.
     "mcp_manifest": "https://mcp.paraugs.lv/.well-known/mcp/manifest.json",
     "challenge_endpoint": "https://mcp.paraugs.lv/.well-known/mcp/challenge",
     "node_manifest": "https://mcp.paraugs.lv/.well-known/mcp-node.json",
-    "trust_registry": "https://aiexchange.pppa.lv/registry/paraugs"
+    "trust_registry": "https://registry.pppa.lv/paraugs"
   },
   "_note": "MCPF Level 3. Key ownership is provable at the challenge endpoint. Accreditation is verifiable in the PPPA Trust Registry."
 }
@@ -1251,7 +1282,7 @@ VerifyKey(pubkey).verify(
 
 # 4. participant credential + status
 vc = httpx.get(ident["credentials"]["credential_url"]).json()
-assert vc["issuer"] == "did:web:aiexchange.pppa.lv"
+assert vc["issuer"] == "did:web:pppa.lv"
 assert vc["credentialSubject"]["id"] == ident["identity"]["did"]
 assert not is_revoked(vc["credentialStatus"])
 
@@ -1291,7 +1322,7 @@ Run by PPPA with the organisation present. All tests MUST pass before the regist
 
 | ID | Test | Expected |
 |---|---|---|
-| **A-01** | Fetch participant credential | Signature verifies against `did:web:aiexchange.pppa.lv` |
+| **A-01** | Fetch participant credential | Signature verifies against `did:web:pppa.lv` |
 | **A-02** | `credentialSubject.id` vs node DID | **Identical** |
 | **A-03** | Check StatusList2021 index | Bit = 0 (valid) |
 | **A-04** | PPPA suspends the credential, retest | Bit = 1; **verifier rejects within the tier's cache window** |
@@ -1343,7 +1374,7 @@ MCPF:            v1.2, Level 3
 Tests:           D-01…D-06, K-01…K-05, A-01…A-05,
                  Z-01…Z-08, P-01…P-06, U-01…U-06
 Result:          PASS / FAIL (per test, recorded)
-Report:          https://aiexchange.pppa.lv/reports/{slug}-{yyyy-mm}.json
+Report:          https://registry.pppa.lv/reports/{slug}-{yyyy-mm}.json
 Signed:          Organisation ______________  PPPA ______________
 Registry status: listed → verified → accredited
 ```
