@@ -16,7 +16,7 @@ The key words **MUST**, **MUST NOT**, **REQUIRED**, **SHOULD**, **SHOULD NOT** a
 ## Table of contents
 
 **Part I — Normative core**
-1. Purpose and scope
+1. Purpose and scope — *including a plain-language statement of the problem (§1.1)*
 2. Principles
 3. Identifiers
 4. MCPF conformance
@@ -56,9 +56,42 @@ The key words **MUST**, **MUST NOT**, **REQUIRED**, **SHOULD**, **SHOULD NOT** a
 
 ## 1. Purpose and scope
 
+### 1.1 The problem this solves
+
+*This section assumes no technical knowledge. It explains why the Exchange exists.*
+
+AI systems are beginning to act on behalf of organisations and people. An assistant checks whether a company is solvent before a contract is signed. A municipal system asks an energy supplier for a building's consumption. A citizen's assistant requests a document on their behalf. Increasingly, the party asking the question is not a person clicking a button — it is software acting for someone.
+
+This creates a problem that no organisation can solve alone.
+
+**When software asks a question, the answering system has no way to know who is really asking.** It cannot see whether the requester is who it claims to be, whether it is authorised to act for the organisation or person it names, or whether it is entitled to the answer at all. Today that question is answered — where it is answered — by a bilateral integration project, negotiated once, for one pair of systems. That does not scale to hundreds of participants, and it does not scale at all to AI agents that appear, act and disappear within a day.
+
+The consequences run in both directions, and both are damaging.
+
+**Organisations close their doors.** Faced with automated requesters they cannot identify, the rational response is to block all of them. Terms of service prohibit automated access; interfaces are defended against it. The data stays locked away and the systems that could safely use it never get to.
+
+**AI systems then rely on whatever they can reach.** Denied authoritative sources, they fall back on what is scraped, cached, stale or simply wrong — and they answer confidently anyway. A person acts on a company's representation rights that changed six months ago. Nobody can later establish who asked, what they were told, or on what basis.
+
+Neither outcome is acceptable. **The goal is for AI systems to be able to obtain reliable information from authoritative sources — and for the organisations holding that information to be able to give it out safely, deliberately, and on their own terms.**
+
+For that to work, four things must be true of every automated request:
+
+- the answering system can establish **who is asking**, and prove it cryptographically rather than take it on trust;
+- it can establish **on whose behalf** the requester is acting, and **what they are permitted to do**;
+- the requesting side can establish that the **answering system is genuine**, and not an impersonation;
+- **both sides can show afterwards** what was asked, by whom, and what was answered.
+
+None of this is achievable by one organisation acting alone, any more than one bank could invent payment cards by itself. It requires a shared way of establishing trust — and that is what this profile defines.
+
+**What it deliberately does not do.** The Exchange does not pool anyone's data, does not act as a middleman for it, and does not give any participant access to another's information. Each organisation continues to decide entirely for itself who may use its services and on what terms. What the Exchange adds is the ability to *know who is on the other end* — and the ability to stop trusting them the moment that changes.
+
+### 1.2 What this profile defines
+
 The AI LV Exchange MCP Node Profile defines how organisations and their AI agents discover and use MCP services across organisational boundaries.
 
-It adds a federated trust layer **around** the Model Context Protocol. It does not replace MCP, OAuth, a participant's existing APIs, or its internal access control.
+MCP — the Model Context Protocol — is the emerging industry standard by which AI systems connect to the tools and data sources they use. It defines *how* to connect. It does not define *whom to trust*. This profile supplies the missing part.
+
+It adds a federated trust layer **around** MCP. It does not replace MCP, OAuth, a participant's existing APIs, or its internal access control.
 
 The profile answers four questions, and nothing else:
 
