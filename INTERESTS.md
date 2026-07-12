@@ -14,7 +14,7 @@ Anyone may open an issue to challenge an entry, or to point out an interest they
 
 | Person | Organisation | Role in the profile | Declared interest | Recuses from |
 |---|---|---|---|---|
-| *[name]* | **PPPA** | Chair, Scheme Authority | PPPA operates the Trust Registry, acts as Ecosystem Trust Anchor, and during the sandbox phase also performs Registration Authority functions. PPPA therefore has an institutional interest in the scheme's adoption. | Decisions on its own separation timeline (§14.1) where an independent reviewer is available |
+| *[name]* | **PPPA** | Chair, Scheme Authority | PPPA operates the Trust Registry, acts as Ecosystem Trust Anchor, and acts as Scheme Registrar. PPPA therefore has an institutional interest in the scheme's adoption. It does not attest to legal facts (§14.2). | Decisions on its own separation timeline (§14.1) where an independent reviewer is available |
 | *[name]* | **Cyberfort SIA** | Contributor / editor | Cyberfort develops commercial products that implement or depend on this profile, and is a technical partner to PPPA. Its principal is also a contributor to the MCP Trust Framework upstream. | Any change that would make a Cyberfort implementation mandatory or advantaged; any assessment of the conformity of a Cyberfort product; accreditation of a Cyberfort service; exclusion of a competing implementation |
 | *[name]* | *[organisation]* | *[role]* | *[interest, or "none"]* | *[scope of recusal, or "n/a"]* |
 
@@ -29,7 +29,7 @@ An interest exists where the contributor, their employer, or an entity they cont
 - sells or intends to sell an implementation of this profile;
 - sells or intends to sell a product whose adoption this profile would advantage;
 - is an Exchange participant, or is applying to become one;
-- performs, or expects to perform, Registration Authority or conformity assessment functions;
+- performs, or expects to perform, Scheme Registrar or conformity assessment functions;
 - has any other interest a reasonable reader would want to know about.
 
 ## What recusal means

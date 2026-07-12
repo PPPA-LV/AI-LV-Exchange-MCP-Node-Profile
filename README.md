@@ -236,7 +236,7 @@ An `AgentIdentityCredential` MUST NOT carry an open-ended business mandate. Mand
 
 ### 5.2 Optional credential types
 
-`AgentIssuerAccreditationCredential` and `RegistrationAuthorityAccreditationCredential` become relevant once issuance or registration is federated beyond PPPA. They are not required for a node to participate.
+`AgentIssuerAccreditationCredential` becomes relevant once credential issuance is federated beyond the participant's own organisation. It is not required for a node to participate.
 
 ### 5.3 Conformity
 
@@ -317,7 +317,7 @@ See **Annex A** for the schema and **Annex B.4** for a complete worked example.
 
 | Issuer | May suspend or revoke |
 |---|---|
-| PPPA | Exchange participation; where applicable, RA and issuer accreditation |
+| PPPA | Exchange participation; where applicable, agent-issuer accreditation |
 | Participant organisation | Identity credentials of its own agents |
 | Principal / mandate service | Agent mandates |
 | MCP service provider | Service entitlements, OAuth tokens, live sessions |
@@ -468,7 +468,7 @@ On termination:
 | **Scheme Authority** | Governance framework, profiles, assurance levels, admission rules — PPPA |
 | **Ecosystem Trust Anchor** | Issues accreditation credentials — PPPA, or an entity it appoints |
 | **Trust Registry Operator** | Publishes the status of participants, issuers and nodes |
-| **Registration Authority** | Verifies legal existence, representation rights, domain control |
+| **Scheme Registrar** | Receives applications; holds the records; maintains the Trust Registry; issues, suspends and withdraws membership. **Does not attest to legal facts** (§14.2) |
 | **Conformity Assessor** | Tests an implementation against this profile |
 | **Node organisation** | Participates as service provider, agent operator, agent issuer, or a combination |
 | **Agent issuer** | Issues credentials to agents under its control |
@@ -481,12 +481,34 @@ One organisation MAY hold several roles. **Each role and its corresponding respo
 
 ### 14.1 Concentration of roles during the sandbox phase
 
-During the sandbox phase PPPA acts simultaneously as Scheme Authority, Ecosystem Trust Anchor, Trust Registry Operator and Registration Authority. This concentration is declared, and it is bounded by the following, which are commitments and not aspirations:
+During the sandbox phase PPPA acts simultaneously as Scheme Authority, Ecosystem Trust Anchor, Trust Registry Operator and Scheme Registrar. This concentration is declared, and it is bounded by the following, which are commitments and not aspirations:
 
 - **PPPA cannot reach a participant's data.** It never receives it, cannot issue an entitlement to it (§5.1), and cannot compel its disclosure.
 - **PPPA cannot take a participant's identity or namespace** (§3.4). Both reside on the participant's own domain.
 - **PPPA's power to withdraw accreditation is governed by §15**, which sets exhaustive grounds, notice, cure, a two-officer decision and an independent appeal.
-- **Separation timeline.** The Registration Authority and Conformity Assessor functions MUST be separated from the Scheme Authority before the Exchange leaves sandbox status, or before it admits its third participant, whichever occurs first.
+- **PPPA does not attest to legal facts** (§14.2). It relies on independent sources and records what it relied on.
+- **Separation timeline.** The Conformity Assessor function MUST be separated from the Scheme Authority before the Exchange leaves sandbox status, or before the Exchange admits its third participant, whichever occurs first.
+
+### 14.2 Verified facts and relied-upon facts
+
+The Exchange does not operate a Registration Authority in the PKI sense, and PPPA does not certify anyone's identity. Admission rests on two different kinds of fact, and they are treated differently.
+
+| Fact | Established by | PPPA's role |
+|---|---|---|
+| Legal existence | **Uzņēmumu reģistrs** | **Relies.** Obtains the extract, records it, records its date |
+| Representation rights of the signatory | **Uzņēmumu reģistrs** | **Relies.** Obtains the extract, records it, records its date |
+| Identity of the signatory | **Qualified electronic signature** | **Relies.** Receives the signed agreement |
+| **Control of the declared domain** | — | **Verifies.** DNS challenge, reproducible, logged |
+| **Control of the declared key** | — | **Verifies.** MCPF challenge endpoint, reproducible, logged |
+| Conformance to this profile | Conformity assessor | **Records** the published report |
+
+PPPA **verifies** what is technical and reproducible: anyone may re-run a DNS challenge or a key challenge and obtain the same answer. PPPA **relies on** what is legal: it never attests to legal existence or representation rights, because the state register — not an association — is the authority on those facts.
+
+The output of admission is therefore a **reliance statement, not an attestation**:
+
+> *PPPA relied on the Uzņēmumu reģistrs extract of [date] showing [representative]; PPPA itself verified control of the domain [domain] and of key [key id] on [date].*
+
+**Circularity is excluded, not merely flagged.** Legal facts MUST be taken from the state register. A participant MUST NOT be the source of the evidence used to admit it, and PPPA MUST NOT rely on a participant's own data to verify that participant.
 
 ---
 
@@ -540,7 +562,7 @@ Commercial products MAY support implementation. They **MUST NOT** be prerequisit
 
 **AL0 — Listing.** Self-declared catalogue entry. No credential is issued. MUST NOT be presented as verified.
 
-**AL1 — Verified organisation.** A Registration Authority verifies: legal existence; registration number; authorised representative or valid power of attorney; control of the declared domain; operational contact details.
+**AL1 — Verified organisation.** Per §14.2: legal existence, registration number and representation rights are **relied upon** from the Uzņēmumu reģistrs; the signatory's identity is relied upon from a qualified electronic signature; control of the declared domain is **verified** by PPPA. Operational and security contacts are declared by the applicant.
 
 **AL2 — Accredited node.** AL1, plus: signed participation agreement; security and incident contacts; organisation-controlled DID; demonstrated credential status and revocation capability; published node manifest; MCPF conformity result; exit and incident procedures.
 
@@ -548,7 +570,7 @@ Commercial products MAY support implementation. They **MUST NOT** be prerequisit
 
 **17.1 Onboarding record.** The record MUST state which checks PPPA performed itself, which external evidence sources were used, which claims PPPA is making, and which claims remain the participant's responsibility.
 
-**17.2 Circularity.** Where a participant is itself the authoritative source of the evidence used to verify it, the Registration Authority MUST record this and MUST use an independent source for at least representation rights.
+**17.2 Circularity.** A participant MUST NOT be the source of the evidence used to admit it. Legal facts MUST be taken from the Uzņēmumu reģistrs, never from the applicant's own data or products — including where the applicant is itself a commercial provider of company-register data.
 
 ---
 
@@ -662,7 +684,7 @@ Stated openly, and tracked as issues in this repository.
 2. **No published conformance test suite.** Conformity is a registry flag until one exists. Annex B.6 defines the interim acceptance procedure.
 3. **Key compromise runbook** — the rotation policy is defined (§4.4); the incident runbook is not.
 4. **In-flight mandates on withdrawal** — behaviour of a mandate mid-transaction when accreditation is withdrawn is unspecified.
-5. **Funding and liability of the Registration Authority function.**
+5. **PPPA's liability for a reliance statement** (§14.2) — narrower than liability for an attestation, but not yet settled with counsel.
 6. **Personal-agent verification chain** (§21).
 7. **Migration path** to VC Data Model 2.0 and BitstringStatusList, pending interoperability review.
 
@@ -747,7 +769,7 @@ A complete worked example: **SIA "Paraugs"**, reg. no. 40000000000, domain `para
 | # | Step | Owner | Output |
 |---|---|---|---|
 | 1 | Application and listing | Organisation | AL0 registry entry |
-| 2 | Verification of legal entity, representation rights, domain control | **PPPA** (as RA) | Onboarding record |
+| 2 | Legal facts relied upon from the state register; domain control verified | **PPPA** (Scheme Registrar) | Reliance statement |
 | 3 | Participation agreement | Both | Signed agreement |
 | 4 | Trust Registry entry, ExchangeParticipantCredential, status list entry | **PPPA** | Participant credential |
 | 5 | Key generation, DID document, issuer | **Organisation** | `did:web:mcp.paraugs.lv` |
@@ -763,14 +785,22 @@ A complete worked example: **SIA "Paraugs"**, reg. no. 40000000000, domain `para
 
 ## B.2 Phase 1 — Admission (PPPA)
 
-### B.2.1 Verification performed by PPPA as Registration Authority
+### B.2.1 What PPPA relies on, and what PPPA verifies
 
-| Check | Source | Evidence recorded |
-|---|---|---|
-| Legal existence, reg. no. | Uzņēmumu reģistrs | Extract, dated |
-| Representation rights of the signatory | Uzņēmumu reģistrs — **an independent source, never the applicant's own data** | Extract, dated |
-| Domain control of `paraugs.lv` | DNS TXT challenge | Challenge token + resolution log |
-| Security and operational contacts | Applicant declaration | Contact record |
+PPPA does not certify Paraugs. It records what it relied on, and it verifies what is technically reproducible (§14.2).
+
+| Fact | Source | PPPA | Evidence recorded |
+|---|---|---|---|
+| Legal existence, reg. no. | Uzņēmumu reģistrs | **Relies** | Extract, dated |
+| Representation rights of the signatory | Uzņēmumu reģistrs — **never the applicant's own data or products** | **Relies** | Extract, dated |
+| Signatory identity | Qualified electronic signature | **Relies** | Signed agreement |
+| Control of `paraugs.lv` | DNS challenge | **Verifies** | Challenge token + resolution log |
+| Control of key `#key-1` | MCPF challenge endpoint | **Verifies** | Challenge + signature, reproducible |
+| Security and operational contacts | Applicant declaration | Records | Contact record |
+
+The resulting **reliance statement**, published with the registry entry:
+
+> *PPPA relied on the Uzņēmumu reģistrs extract of 2026-07-18 showing [representative] with sole representation rights for SIA Paraugs, reg. no. 40000000000. PPPA itself verified control of the domain `paraugs.lv` on 2026-07-18 and of key `did:web:mcp.paraugs.lv#key-1` on 2026-07-20.*
 
 Domain control challenge:
 

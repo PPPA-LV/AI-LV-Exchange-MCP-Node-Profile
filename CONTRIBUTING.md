@@ -30,7 +30,7 @@ A declaration is required where the contributor, or their employer, or an entity
 - sells or intends to sell an implementation of this profile;
 - sells or intends to sell a product whose adoption this profile would advantage;
 - is an Exchange participant, or is applying to become one;
-- performs, or expects to perform, Registration Authority or conformity assessment functions;
+- performs, or expects to perform, Scheme Registrar or conformity assessment functions;
 - has any other interest a reasonable reader would want to know about.
 
 **How.** Add the declaration to the pull request description, using the template in §6. Declarations are also recorded in [`INTERESTS.md`](INTERESTS.md), which is public and kept current.
