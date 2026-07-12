@@ -1240,3 +1240,15 @@ Registry status: listed → verified → accredited
 ```
 
 The test report is published. The registry flag is set only on a full pass, and is reset to `verified` on any failure at re-test.
+
+---
+
+## Governance of this document
+
+| | |
+|---|---|
+| **Licence** | Specification text: CC BY 4.0. Schemas and code: MIT. See [LICENSE.md](LICENSE.md). |
+| **Contributing** | Open working group. No single company may be sole editor. See [CONTRIBUTING.md](CONTRIBUTING.md). |
+| **Declared interests** | [INTERESTS.md](INTERESTS.md) — mandatory for anyone proposing normative change, including PPPA. |
+| **Security defects** | security@pppa.lv — not a public issue, in the first instance. |
+| **Known gaps** | §24, tracked as issues in this repository. |
