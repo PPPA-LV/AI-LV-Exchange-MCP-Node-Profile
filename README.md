@@ -135,7 +135,9 @@ No commercial platform is a prerequisite for participation. A technical provider
 
 ### 2.7 Privacy by design
 
-Personal AI agents are not publicly listed. Pairwise or pseudonymous identifiers, selective disclosure and short-lived mandates SHOULD be used wherever the use case permits.
+Personal AI agents are **never publicly listed**. The Trust Registry lists accredited personal-agent providers; it does not list persons or individual agents.
+
+Where a service requires the identity of the person behind an agent, that identity is disclosed **to that service only**, and only to the extent the service needs it. Selective disclosure and short-lived, narrowly scoped mandates MUST be used wherever the use case permits.
 
 ---
 
@@ -146,7 +148,7 @@ Personal AI agents are not publicly listed. Pairwise or pseudonymous identifiers
 Each participant uses a DID resolving through a domain it controls:
 
 ```
-did:web:lursoft.lv
+did:web:example.lv
 did:web:mcp.example.lv
 ```
 
@@ -249,6 +251,7 @@ Normatively:
 | **AgentIdentityCredential** | The participant | Its own agent | This agent is operated by this organisation; agent type; general role; validity |
 | **AgentMandateCredential** | The principal, or the principal's organisation | Agent | Represented party; target service class; permitted actions; prohibited actions; limits; validity window; human-confirmation requirements |
 | **ServiceEntitlementCredential** | The MCP service provider | Customer organisation or agent | Subscription status; permitted resources; licensed datasets; rate limits; commercial tier |
+| **PersonalAgentCredential** | Accredited personal-agent provider | A natural person's agent | This agent is controlled by an identified natural person; identity established at creation by qualified electronic identification; the agent holds its own key (§21) |
 
 **The service provider issues the entitlement to its own data.** PPPA does not and cannot. The organisation holding the data decides who may read it.
 
@@ -492,6 +495,7 @@ On termination:
 | **Conformity Assessor** | Tests an implementation against this profile |
 | **Node organisation** | Participates as service provider, agent operator, agent issuer, or a combination |
 | **Agent issuer** | Issues credentials to agents under its control |
+| **Personal-agent provider** | Accredited to create agents for natural persons, binding each agent to an identified person at creation (§21) |
 | **Principal** | The person or organisation on whose behalf an agent acts |
 | **MCP service provider** | Operates the server; makes the final authorization decision |
 | **Technical service provider** | Supplies software or infrastructure, **and thereby acquires no trust authority** |
@@ -642,23 +646,78 @@ The authoritative record always remains with the participant. There is no extern
 
 ## 20. Agent-to-agent
 
-A central agent-to-agent delegation registry is **not required** for MCP participation.
+MCP participation does not depend on agent-to-agent messaging. Read operations rely on participant accreditation, agent identity, service entitlement, mandate and OAuth authorization — the agent calls the service directly.
 
-Read operations rely on: participant accreditation, agent identity, service entitlement, mandate, and OAuth authorization.
+Some interactions are better expressed as one agent addressing another rather than as a tool call: negotiation, multi-step coordination, or a task handed to a counterparty's agent to complete. **PPPA operates an A2A endpoint for these cases.** It is an optional communication mechanism, available to participants that want it.
 
-T2 and T3 agent-to-agent transactions MAY additionally require an explicit transaction mandate, replay protection, nonce and audience binding, action-level constraints, counterparty confirmation, human approval, and signed transaction receipts.
+Where agents interact directly at T2 or T3, the applicable profile MAY additionally require an explicit transaction mandate, replay protection, nonce and audience binding, action-level constraints, counterparty confirmation, human approval, and signed transaction receipts.
 
-**An A2A registry MUST NOT become the only place where a legally relevant mandate can exist.**
-
----
+A mandate is valid because the principal issued it and the issuer stands behind it — not because it appears in any registry. Mandates are therefore verifiable independently of the A2A endpoint, and remain so if a participant chooses not to use it.
 
 ## 21. Personal AI agents
 
-Personal AI agents are **out of scope for v0.2**.
+Most requests reaching the Exchange will come from agents acting for **people**, not for companies. Personal agents are therefore in scope, and the profile defines them in two phases, which differ in one decisive respect: **whether the service can establish who the person is.**
 
-The intended model is pairwise, unlisted, key-bound agents identified through an accredited personal-agent provider, with the person never listed. The verification chain — how a relying party confirms that a pairwise, unlisted agent belongs to an accredited provider without destroying the pseudonymity that motivates pairwise identifiers — is not yet specified, and is deferred.
+### 21.1 Phase 1 — general-purpose assistants, public services only
 
-The Trust Registry MAY list personal-agent **providers**. It **MUST NOT** list persons or individual private agent instances.
+A person can already reach an Exchange member's MCP server today, using a general-purpose assistant such as a consumer chat application.
+
+**Such a client cannot prove who its user is.** It holds no key belonging to the person, carries no credential, and is not an Exchange participant. Nothing it asserts about its user can be verified, and a request arriving through it is indistinguishable from one crafted by anyone else.
+
+Therefore, normatively:
+
+- A general-purpose AI client **MUST NOT** be granted access above **T0**.
+- A member **MUST NOT** rely on any claim of user identity made by such a client.
+- Personal data, customer data and legally significant results **MUST NOT** be served to it.
+
+This is not a limitation to be worked around; it is the correct outcome. An unidentified requester receives public information and nothing else. Phase 1 is valuable *because* it is safe: people use the assistants they already have to reach authoritative public services, and members publish those services knowing no unidentified party can reach further.
+
+A member MAY, at its own discretion and risk, authenticate its own existing customers by its own means through such a client. **The Exchange makes no assertion about that requester, no Exchange credential is involved, and the member bears the risk alone.**
+
+### 21.2 Phase 2 — AI Twin: an agent bound to an identified person
+
+The second phase removes the limitation properly, by giving the person's agent an identity of its own.
+
+**Creation.** The person authenticates to an accredited personal-agent provider using **qualified electronic identification** (LVRTC / eParaksts). This happens **once, at creation**. The provider then generates the agent's key pair — the private key stays under the agent's control — and issues a **PersonalAgentCredential** binding the agent's identifier to the identified natural person.
+
+**Runtime.** The agent proves control of its key by challenge-response (§4). It presents its PersonalAgentCredential and a mandate the person granted. The member can then establish, cryptographically:
+
+1. this agent holds the key it claims;
+2. this agent belongs to an identified person, and that identification was rooted in state-issued electronic identity;
+3. the person granted this mandate, for this purpose, and it has neither expired nor been revoked.
+
+**The person is identified to the member.** That is the point. A service releasing someone's document, or acting on their behalf, must know whose document it is and for whom it is acting. Pseudonymity is not appropriate here, and this profile does not attempt it.
+
+**What is disclosed is minimised, not maximised.** Identity is disclosed to the service that needs it, to the extent it needs it, and to no one else. The person is never listed publicly, never appears in the Trust Registry, and is not visible to other participants.
+
+### 21.3 The personal-agent provider
+
+Creating an agent that speaks for an identified person is a distinct and consequential role, and it is accredited as such.
+
+An accredited personal-agent provider:
+
+- **MUST** establish the person's identity at agent creation using qualified electronic identification;
+- **MUST** record what identification it relied upon, and when;
+- **MUST NOT** hold, or be able to use, the agent's private key on the person's behalf without the person's authorisation;
+- **MUST** allow the person to revoke any agent, and any mandate, at any time, with immediate effect;
+- **MUST** publish a status list for the credentials it issues;
+- **MUST** be **AL2** minimum, and **AL3** where its agents may perform T3 operations.
+
+The Trust Registry lists **providers**. It does not list persons or agents.
+
+### 21.4 Mandates
+
+A personal mandate is granted by the person — not by the provider, and not by the Exchange. It states what the agent may do, for which service or class of service, within what limits, and until when.
+
+Mandates **MUST** be narrowly scoped, time-bound, and revocable with immediate effect. A personal agent **MUST NOT** hold an open-ended mandate. Where an action has legal consequence, the mandate **MUST** require explicit human confirmation at the time of the action.
+
+### 21.5 Access tiers for personal agents
+
+| Requester | Maximum tier | Basis |
+|---|---|---|
+| General-purpose AI client (Phase 1) | **T0** | No verifiable identity of any kind |
+| AI Twin with valid credential and mandate (Phase 2) | **T1 / T2** | Identified person, proven key control, scoped mandate |
+| AI Twin performing a T3 operation | **T3** | As above, plus an AL3 provider and explicit human confirmation |
 
 ---
 
@@ -705,7 +764,7 @@ Stated openly, and tracked as issues in this repository.
 3. **Key compromise runbook** — the rotation policy is defined (§4.4); the incident runbook is not.
 4. **In-flight mandates on withdrawal** — behaviour of a mandate mid-transaction when accreditation is withdrawn is unspecified.
 5. **PPPA's liability for a reliance statement** (§14.2) — narrower than liability for an attestation, but not yet settled with counsel.
-6. **Personal-agent verification chain** (§21).
+6. **Personal-agent provider accreditation criteria** (§21.3) — the role is defined; the detailed evidence and audit requirements for accrediting a provider are not yet written.
 7. **Migration path** to VC Data Model 2.0 and BitstringStatusList, pending interoperability review.
 
 ---

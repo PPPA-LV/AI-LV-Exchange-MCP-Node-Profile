@@ -27,7 +27,7 @@
       "type": "array",
       "minItems": 1,
       "items": {
-        "enum": ["mcpServiceProvider", "agentOperator", "agentIssuer"]
+        "enum": ["mcpServiceProvider", "agentOperator", "agentIssuer", "personalAgentProvider"]
       }
     },
 
