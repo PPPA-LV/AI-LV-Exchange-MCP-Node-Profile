@@ -16,7 +16,7 @@ The key words **MUST**, **MUST NOT**, **REQUIRED**, **SHOULD**, **SHOULD NOT** a
 ## Table of contents
 
 **Part I — Normative core**
-1. Purpose and scope — *including a plain-language statement of the problem (§1.1)*
+1. Purpose and scope — *including a plain-language statement of why the Exchange exists (§1.1–1.3)*
 2. Principles
 3. Identifiers
 4. MCPF conformance
@@ -56,36 +56,44 @@ The key words **MUST**, **MUST NOT**, **REQUIRED**, **SHOULD**, **SHOULD NOT** a
 
 ## 1. Purpose and scope
 
-### 1.1 The problem this solves
+### 1.1 Why the Exchange exists
 
-*This section assumes no technical knowledge. It explains why the Exchange exists.*
+*This section assumes no technical knowledge.*
 
-AI systems are beginning to act on behalf of organisations and people. An assistant checks whether a company is solvent before a contract is signed. A municipal system asks an energy supplier for a building's consumption. A citizen's assistant requests a document on their behalf. Increasingly, the party asking the question is not a person clicking a button — it is software acting for someone.
+**The purpose of the Exchange is to make work better for people and organisations.** Faster, more accurate, less repetitive, less expensive. Artificial intelligence and the protocols described in this profile are the means. They are not the point.
 
-This creates a problem that no organisation can solve alone.
+Much of the routine work in an economy is the same handful of steps repeated endlessly: confirming that a counterparty exists and that the person signing may sign; requesting a document that another institution already holds; supplying the same information to the same authority for the third time; waiting days for an answer that a system could give in a second. These steps consume an enormous share of the working hours of both companies and public bodies, and they produce nothing. They are the cost of coordination, not the work itself.
 
-**When software asks a question, the answering system has no way to know who is really asking.** It cannot see whether the requester is who it claims to be, whether it is authorised to act for the organisation or person it names, or whether it is entitled to the answer at all. Today that question is answered — where it is answered — by a bilateral integration project, negotiated once, for one pair of systems. That does not scale to hundreds of participants, and it does not scale at all to AI agents that appear, act and disappear within a day.
+AI systems can now take that coordination on — checking, requesting, cross-referencing, filing — on behalf of the person or organisation they serve. **The value is not that a machine is doing it. The value is that the person is freed from it, and that the result arrives sooner and is more likely to be right.**
 
-The consequences run in both directions, and both are damaging.
+### 1.2 What stands in the way
 
-**Organisations close their doors.** Faced with automated requesters they cannot identify, the rational response is to block all of them. Terms of service prohibit automated access; interfaces are defended against it. The data stays locked away and the systems that could safely use it never get to.
+For an AI agent to do that work, it must ask other organisations' systems for information — and there the process stops.
 
-**AI systems then rely on whatever they can reach.** Denied authoritative sources, they fall back on what is scraped, cached, stale or simply wrong — and they answer confidently anyway. A person acts on a company's representation rights that changed six months ago. Nobody can later establish who asked, what they were told, or on what basis.
+**The answering system has no way to know who is really asking.** It cannot see whether the requester is who it claims to be, whether it is authorised to act for the organisation or person it names, or whether it is entitled to the answer at all. Today that is settled — where it is settled — by a bilateral integration project, negotiated once, for one pair of systems. That does not scale to hundreds of participants, and not at all to agents that appear, act and disappear within a day.
 
-Neither outcome is acceptable. **The goal is for AI systems to be able to obtain reliable information from authoritative sources — and for the organisations holding that information to be able to give it out safely, deliberately, and on their own terms.**
+So the process fails in both directions, and both failures are costly.
 
-For that to work, four things must be true of every automated request:
+**Organisations close their doors.** Faced with automated requesters they cannot identify, blocking all of them is the rational response. Terms of service prohibit automated access; interfaces are defended against it. The information stays locked away, and the coordination work stays manual.
+
+**AI systems then work from whatever they can reach** — scraped, cached, stale, or simply wrong — and answer confidently anyway. Someone acts on representation rights that changed six months ago. Afterwards, nobody can establish who asked, what they were told, or on what basis. The work gets faster and less trustworthy at the same time, which is worse than not automating it at all.
+
+### 1.3 What has to be true instead
+
+For automated coordination to be worth having, four things must hold for every request:
 
 - the answering system can establish **who is asking**, and prove it cryptographically rather than take it on trust;
-- it can establish **on whose behalf** the requester is acting, and **what they are permitted to do**;
+- it can establish **on whose behalf** the requester acts, and **what that mandate permits**;
 - the requesting side can establish that the **answering system is genuine**, and not an impersonation;
 - **both sides can show afterwards** what was asked, by whom, and what was answered.
 
-None of this is achievable by one organisation acting alone, any more than one bank could invent payment cards by itself. It requires a shared way of establishing trust — and that is what this profile defines.
+No organisation can achieve this alone, any more than a single bank could have invented payment cards by itself. It requires a shared way of establishing trust. That is what this profile defines.
 
-**What it deliberately does not do.** The Exchange does not pool anyone's data, does not act as a middleman for it, and does not give any participant access to another's information. Each organisation continues to decide entirely for itself who may use its services and on what terms. What the Exchange adds is the ability to *know who is on the other end* — and the ability to stop trusting them the moment that changes.
+**And what it deliberately does not do.** The Exchange does not pool anyone's data, does not act as a middleman for it, and does not give any participant access to another's information. Each organisation decides entirely for itself who may use its services, and on what terms. What the Exchange adds is the ability to **know who is on the other end** — and to stop trusting them the moment that changes.
 
-### 1.2 What this profile defines
+The organisations that join are not doing a favour to AI. They are removing friction from their own processes, and from those of everyone they deal with, while keeping control of what leaves their systems.
+
+### 1.4 What this profile defines
 
 The AI LV Exchange MCP Node Profile defines how organisations and their AI agents discover and use MCP services across organisational boundaries.
 
