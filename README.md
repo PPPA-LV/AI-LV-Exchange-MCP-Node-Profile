@@ -638,7 +638,11 @@ The PPPA Trust Registry is authoritative **only** for Exchange-level facts about
 
 It is a **register of accredited organisations. It is not a registry of agents, and it is not a service catalogue.**
 
-The Trust Registry MUST be published **signed and mirrorable**, so that a verifier can hold a local copy and continue to verify accreditation without reaching PPPA at request time. PPPA's availability must never be a runtime dependency of any participant (§2.2).
+**The Trust Registry is not in the verification path.** A verifier establishes accreditation from the participant's `ExchangeParticipantCredential` — signed by the trust anchor — and its status list. Both are signed artefacts that verify against a key the verifier already holds (§4.5). The credential travels with the holder; a verifier does not query a database to establish trust.
+
+The Trust Registry is therefore **advisory and transparent**, not authoritative and load-bearing. **PPPA's availability MUST NOT be a runtime dependency of any participant** (§2.2), and it is not: were the registry unreachable, every accreditation in the Exchange would still verify.
+
+The registry SHOULD nevertheless be published in a form that can be mirrored, so that its history is publicly inspectable and PPPA's admission decisions can be audited by anyone.
 
 The registry MUST distinguish clearly between: listed, verified, accredited, suspended, withdrawn, and expired.
 
