@@ -16,7 +16,7 @@ The key words **MUST**, **MUST NOT**, **REQUIRED**, **SHOULD**, **SHOULD NOT** a
 ## Table of contents
 
 **Part I — Normative core**
-1. Purpose and scope — *including a plain-language statement of why the Exchange exists (§1.1–1.3)*
+1. Purpose and scope — *including a plain-language statement of why the Exchange exists (§1.1)*
 2. Principles
 3. Identifiers
 4. MCPF conformance
@@ -60,40 +60,19 @@ The key words **MUST**, **MUST NOT**, **REQUIRED**, **SHOULD**, **SHOULD NOT** a
 
 *This section assumes no technical knowledge.*
 
-**The purpose of the Exchange is to make work better for people and organisations.** Faster, more accurate, less repetitive, less expensive. Artificial intelligence and the protocols described in this profile are the means. They are not the point.
+**The problem.** AI systems can now do the routine coordination work that people spend their days on — checking a counterparty, requesting a document, filing a form. But when one organisation's system is asked something by another organisation's AI agent, it has no way to know who is really asking, on whose behalf, or whether they are entitled to an answer. So organisations block automated requests, and AI systems fall back on stale or scraped information and answer confidently anyway.
 
-Much of the routine work in an economy is the same handful of steps repeated endlessly: confirming that a counterparty exists and that the person signing may sign; requesting a document that another institution already holds; supplying the same information to the same authority for the third time; waiting days for an answer that a system could give in a second. These steps consume an enormous share of the working hours of both companies and public bodies, and they produce nothing. They are the cost of coordination, not the work itself.
+**The solution.** The Exchange gives every participant a verifiable identity, gives every agent a mandate that says what it may do and for whom, and lets either side withdraw that trust at any moment. Requests then go directly between the two parties — no data passes through the Exchange, and each organisation still decides for itself who may use its services.
 
-AI systems can now take that coordination on — checking, requesting, cross-referencing, filing — on behalf of the person or organisation they serve. **The value is not that a machine is doing it. The value is that the person is freed from it, and that the result arrives sooner and is more likely to be right.**
+**What this is worth:**
 
-### 1.2 What stands in the way
+| | |
+|---|---|
+| **Businesses** | Checks and filings that take days happen in seconds, against authoritative sources rather than guesses — and automated requests become a controlled, paid, auditable channel instead of something to block. |
+| **Public bodies** | Fewer manual requests to process, an audit trail for every enquiry, and no need to hand over data or open a system to do it. |
+| **Citizens** | Their own assistant can obtain documents and complete formalities on their behalf, with a mandate that is limited, time-bound and revocable. |
 
-For an AI agent to do that work, it must ask other organisations' systems for information — and there the process stops.
-
-**The answering system has no way to know who is really asking.** It cannot see whether the requester is who it claims to be, whether it is authorised to act for the organisation or person it names, or whether it is entitled to the answer at all. Today that is settled — where it is settled — by a bilateral integration project, negotiated once, for one pair of systems. That does not scale to hundreds of participants, and not at all to agents that appear, act and disappear within a day.
-
-So the process fails in both directions, and both failures are costly.
-
-**Organisations close their doors.** Faced with automated requesters they cannot identify, blocking all of them is the rational response. Terms of service prohibit automated access; interfaces are defended against it. The information stays locked away, and the coordination work stays manual.
-
-**AI systems then work from whatever they can reach** — scraped, cached, stale, or simply wrong — and answer confidently anyway. Someone acts on representation rights that changed six months ago. Afterwards, nobody can establish who asked, what they were told, or on what basis. The work gets faster and less trustworthy at the same time, which is worse than not automating it at all.
-
-### 1.3 What has to be true instead
-
-For automated coordination to be worth having, four things must hold for every request:
-
-- the answering system can establish **who is asking**, and prove it cryptographically rather than take it on trust;
-- it can establish **on whose behalf** the requester acts, and **what that mandate permits**;
-- the requesting side can establish that the **answering system is genuine**, and not an impersonation;
-- **both sides can show afterwards** what was asked, by whom, and what was answered.
-
-No organisation can achieve this alone, any more than a single bank could have invented payment cards by itself. It requires a shared way of establishing trust. That is what this profile defines.
-
-**And what it deliberately does not do.** The Exchange does not pool anyone's data, does not act as a middleman for it, and does not give any participant access to another's information. Each organisation decides entirely for itself who may use its services, and on what terms. What the Exchange adds is the ability to **know who is on the other end** — and to stop trusting them the moment that changes.
-
-For an organisation that joins, the return is direct: less friction in its own processes, fewer manual steps for its customers and counterparties, and a controlled, accountable channel for the requests it already receives — while it keeps full control of what leaves its systems.
-
-### 1.4 What this profile defines
+### 1.2 What this profile defines
 
 The AI LV Exchange MCP Node Profile defines how organisations and their AI agents discover and use MCP services across organisational boundaries.
 
