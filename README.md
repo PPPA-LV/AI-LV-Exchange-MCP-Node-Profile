@@ -91,7 +91,7 @@ No organisation can achieve this alone, any more than a single bank could have i
 
 **And what it deliberately does not do.** The Exchange does not pool anyone's data, does not act as a middleman for it, and does not give any participant access to another's information. Each organisation decides entirely for itself who may use its services, and on what terms. What the Exchange adds is the ability to **know who is on the other end** — and to stop trusting them the moment that changes.
 
-The organisations that join are not doing a favour to AI. They are removing friction from their own processes, and from those of everyone they deal with, while keeping control of what leaves their systems.
+For an organisation that joins, the return is direct: less friction in its own processes, fewer manual steps for its customers and counterparties, and a controlled, accountable channel for the requests it already receives — while it keeps full control of what leaves its systems.
 
 ### 1.4 What this profile defines
 
