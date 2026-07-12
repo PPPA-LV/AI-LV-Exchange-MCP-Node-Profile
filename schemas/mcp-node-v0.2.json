@@ -1,0 +1,142 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "https://aiexchange.pppa.lv/schemas/mcp-node-v0.2.json",
+  "title": "AI LV Exchange MCP Node Manifest",
+  "description": "Published at https://mcp.{organisation-domain}/.well-known/mcp-node.json",
+  "type": "object",
+  "required": ["profile", "profileVersion", "organisation", "roles", "assurance", "mcpf", "mcpEndpoints", "crypto", "updated"],
+  "additionalProperties": false,
+  "properties": {
+    "$schema": { "type": "string", "format": "uri" },
+    "profile": { "const": "ai-lv-exchange-mcp-node" },
+    "profileVersion": { "const": "0.2" },
+
+    "organisation": {
+      "type": "object",
+      "required": ["name", "registrationNumber", "country", "did"],
+      "additionalProperties": false,
+      "properties": {
+        "name": { "type": "string" },
+        "registrationNumber": { "type": "string", "pattern": "^[0-9]{11}$" },
+        "country": { "type": "string", "pattern": "^[A-Z]{2}$" },
+        "did": { "type": "string", "pattern": "^did:web:" }
+      }
+    },
+
+    "roles": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "enum": ["mcpServiceProvider", "agentOperator", "agentIssuer", "registrationAuthority"]
+      }
+    },
+
+    "assurance": {
+      "type": "object",
+      "required": ["level"],
+      "additionalProperties": false,
+      "properties": {
+        "level": { "enum": ["AL0", "AL1", "AL2", "AL3"] },
+        "participantCredential": { "type": "string", "format": "uri" }
+      }
+    },
+
+    "mcpf": {
+      "type": "object",
+      "required": ["version", "level", "identifyTool"],
+      "additionalProperties": false,
+      "properties": {
+        "version": { "type": "string" },
+        "level": { "enum": ["L0", "L1", "L2", "L3"] },
+        "identifyTool": { "const": true },
+        "challengeEndpoint": { "type": "string", "format": "uri" }
+      },
+      "allOf": [
+        {
+          "comment": "Challenge endpoint is REQUIRED at MCPF L2 and above.",
+          "if": { "properties": { "level": { "enum": ["L2", "L3"] } } },
+          "then": { "required": ["challengeEndpoint"] }
+        }
+      ]
+    },
+
+    "mcpEndpoints": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "type": "object",
+        "required": ["url", "audience", "accessTier", "transport"],
+        "additionalProperties": false,
+        "properties": {
+          "url": { "type": "string", "format": "uri" },
+          "audience": { "enum": ["publisks", "klienti", "partneri", "iekseji"] },
+          "accessTier": { "enum": ["T0", "T1", "T2", "T3"] },
+          "transport": { "const": "streamable-http" },
+          "toolManifest": { "type": "string", "format": "uri" },
+          "authorizationServer": { "type": "string", "format": "uri" }
+        },
+        "allOf": [
+          {
+            "comment": "T1 and above require a declared authorization server.",
+            "if": { "properties": { "accessTier": { "enum": ["T1", "T2", "T3"] } } },
+            "then": { "required": ["authorizationServer"] }
+          }
+        ]
+      }
+    },
+
+    "authorization": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "protectedResourceMetadata": { "type": "string", "format": "uri" }
+      }
+    },
+
+    "credentials": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "issuerDid": { "type": "string", "pattern": "^did:web:" },
+        "statusService": { "type": "string", "format": "uri" }
+      }
+    },
+
+    "discovery": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "agentNamespace": { "type": "string" },
+        "trustRegistryEntry": { "type": "string", "format": "uri" }
+      }
+    },
+
+    "crypto": {
+      "type": "object",
+      "required": ["signing", "credentialFormat", "statusMechanism"],
+      "additionalProperties": false,
+      "properties": {
+        "signing": {
+          "type": "array",
+          "minItems": 1,
+          "contains": { "const": "Ed25519" },
+          "items": { "enum": ["Ed25519", "ES256"] }
+        },
+        "credentialFormat": { "enum": ["vc-1.1"] },
+        "statusMechanism": { "enum": ["StatusList2021"] }
+      }
+    },
+
+    "contacts": {
+      "type": "object",
+      "required": ["security"],
+      "additionalProperties": false,
+      "properties": {
+        "security": { "type": "string", "format": "email" },
+        "operational": { "type": "string", "format": "email" }
+      }
+    },
+
+    "updated": { "type": "string", "format": "date-time" }
+  }
+}
