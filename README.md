@@ -775,32 +775,46 @@ AI LV Exchange is **a network of trust, not a central database.**
 
 Stated openly, and tracked as issues in this repository.
 
-### 24.1 Infrastructure status
+### 24.1 Infrastructure and pilot-deployment status
 
-| Component | Status |
-|---|---|
-| `did:web:pppa.lv` — Exchange trust anchor | **Live** |
-| ANS resolver — agent naming, signed responses | **Live** |
-| MCP server catalogue | **Live** |
-| A2A endpoint | **Live** |
-| **Credential issuer** — signs `ExchangeParticipantCredential` | **Not yet in production** |
-| **StatusList2021** for participant credentials | **Not yet in production** |
-| **Trust Registry** — accredited organisations, assurance level, status | **Not yet in production** |
-| **PPPA challenge endpoint** (`/.well-known/mcp/challenge`) | **Not yet in production** |
+The Exchange is currently operated as an interoperability sandbox. Status below describes factual technical availability. It does not imply a statutory identity scheme, a qualified trust service, a formal certification scheme or a production-service SLA.
 
-Consequently: a node can reach **MCPF L2 today, independently of PPPA** — the challenge endpoint, DID document and manifest are entirely within the participant's own control. **L3 requires the issuer, the status list and the Trust Registry**, and therefore depends on PPPA.
+| Component | Status | Evidence / limitation |
+|---|---|---|
+| `did:web:pppa.lv` — Exchange trust anchor | **Live** | Public DID document and verification keys |
+| PPPA MCPF challenge endpoint | **Live — sandbox** | Public challenge-response endpoint proving control of the trust-anchor key |
+| Exchange participant credential issuer | **Pilot-live** | Has issued a participant credential held by the `mcp.weget.cc` pilot node |
+| Participant StatusList2021 | **Pilot-live** | Participant credential status can be checked and is used in node verification |
+| PPPA Trust Registry | **Pilot-live** | Publishes participant and assurance information; advisory, and not in the runtime verification path |
+| ANS resolver | **Live — experimental** | Optional discovery extension; must not be a mandatory production dependency |
+| MCP service catalogue | **Live — experimental** | Service discovery only; a listing establishes no trust |
+| A2A endpoint | **Live — experimental** | Optional communication mechanism; mandate validity does not depend on the endpoint |
+| `mcp.weget.cc` organisation node | **Live — pilot reference implementation** | AL1 / MCPF L2; public `identify`; DID and JWKS; normative challenge endpoint; schema-valid node manifest |
+| Full automated profile conformance suite | **Incomplete** | Annex B.5 provides the 36-case interim conformity assessment procedure |
+| Inbound Exchange authorization for protected tiers | **Incomplete in the reference node** | T1/T2 caller verification is not yet fully enforced through participant identity, credential, status, mandate and entitlement |
+| Cryptographically signed audit-chain head | **Incomplete in the reference node** | Audit records are hash-chained, but the published chain head is not yet signed |
+| PPPA trust-anchor key separation | **Incomplete** | Mandatory under the profile (§3.3); deployment on the live DID document is not yet demonstrated |
 
-The Trust Registry is a distinct component and cannot be derived from the naming service or the service catalogue: neither holds an assurance level, a registration number, a conformity result, or an accreditation status that can be withdrawn (§19).
+Status vocabulary: **Live** = publicly reachable and functioning. **Pilot-live** = functioning for sandbox and pilot participation. **Incomplete** = partially implemented, not yet meeting every requirement of the profile. **Planned** = not yet implemented.
 
-### 24.2 Specification gaps
+A participant can implement and independently verify **MCPF L2** on infrastructure it controls, without PPPA. **MCPF L3** additionally requires a verified credential path and the agent identity, mandate and entitlement mechanisms applicable to the requested access tier.
 
-1. **No published conformance test suite.** Conformity is a registry flag until one exists. Annex B.5 defines the interim acceptance procedure.
-2. **Key separation.** The DID document must declare distinct verification methods for name-resolution signing and for credential issuance (§3.3). Until it does, compromise of the discovery service would be compromise of accreditation.
-3. **Key compromise runbook** — rotation policy is defined (§4.4); the incident runbook is not.
-4. **In-flight mandates on withdrawal** — the behaviour of a mandate mid-transaction when accreditation is withdrawn is unspecified.
-5. **PPPA's liability for a reliance statement** (§14.2) — narrower than liability for an attestation, but not yet settled with counsel.
-6. **Personal-agent provider accreditation criteria** (§21.3) — the role is defined; the evidence and audit requirements for accrediting a provider are not yet written.
-7. **Migration path** to VC Data Model 2.0 and BitstringStatusList, pending interoperability review.
+The `mcp.weget.cc` deployment is evidence that the profile can be implemented by an independently operated organisation node. It is not, by itself, evidence of full T1–T3 Exchange conformity.
+
+The Trust Registry remains a distinct component and cannot be derived from the naming service or the service catalogue: neither holds an assurance level, a registration number, a conformity result, or an accreditation status that can be withdrawn (§19).
+
+### 24.2 Current implementation gaps
+
+1. **No complete automated profile conformance suite.** Annex B.5 defines the 36-case interim conformity assessment procedure (D 6 + K 5 + A 5 + Z 8 + P 6 + U 6). The Node Starter Kit self-test suite covers only an implementation subset and must not be presented as full-profile conformity.
+2. **Inbound MCPF and Exchange authorization.** The reference node exposes MCPF identity and key-control proof, but protected-tier callers are not yet fully authenticated and authorized through the complete chain of participant accreditation, agent identity, credential status, mandate and service entitlement.
+3. **Audit-chain signature.** The reference audit implementation is hash-chained. A verifiable signed chain head, and its publication and rotation procedure, remain to be implemented.
+4. **Challenge signing input.** The exact bytes covered by the challenge signature must be defined unambiguously and aligned with the pinned MCPF challenge schema. Challenge, timestamp, nonce and domain-separation rules must not be left to implementation interpretation. (The reference node binds the timestamp into the signature; the profile text says the server signs the challenge bytes as supplied. These are not interoperable and must be reconciled against the MCPF SSOT.)
+5. **Key-separation deployment evidence.** The PPPA DID document must demonstrably use separate verification methods for discovery signing and for participant-credential issuance (§3.3). This gap may be closed only once the live DID document and both signing paths have been verified.
+6. **Key-compromise runbook** — rotation policy is defined (§4.4); the incident and recovery runbook is not.
+7. **In-flight mandates on withdrawal** — the behaviour of a mandate mid-transaction when accreditation is withdrawn is unspecified.
+8. **PPPA's liability for a reliance statement** (§14.2) — narrower than liability for an attestation, but not yet settled with counsel.
+9. **Personal-agent provider accreditation criteria** (§21.3) — the role is defined; the evidence, audit and independent-assessment requirements are not.
+10. **Migration path** to VC Data Model 2.0 and BitstringStatusList, pending interoperability review.
 
 ---
 
