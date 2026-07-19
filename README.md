@@ -49,6 +49,7 @@ The key words **MUST**, **MUST NOT**, **REQUIRED**, **SHOULD**, **SHOULD NOT** a
 
 **Annex A** — Node manifest schema
 **Annex B** — Reference organisation node: worked example, deployment workflow and test procedure
+**Annex C** — Payment profile: identity-bound pricing for paid MCP tools *(optional)*
 
 ---
 
@@ -886,6 +887,8 @@ Published at `https://mcp.{organisation-domain}/.well-known/mcp-node.json`.
 }
 ```
 
+A node implementing **Annex C** additionally publishes an optional `payment` object; see C.4.3.
+
 ---
 
 # ANNEX B — Reference organisation node
@@ -1398,6 +1401,247 @@ Registry status: listed → verified → accredited
 ```
 
 The test report is published. The registry flag is set only on a full pass, and is reset to `verified` on any failure at re-test.
+
+---
+
+# ANNEX C — Payment profile
+
+> **Status.** This annex is **optional**. A node is fully conformant with this profile without implementing any part of it. It applies only to a node that declares at least one paid tool. Where it uses RFC 2119 keywords, they bind such a node.
+>
+> **Version.** Annex C v0.1, introduced in Node Profile v0.2. The conformance cases in C.10 are a **separate conditional suite** and do not alter the 36-case interim conformity assessment procedure of Annex B.5.
+
+---
+
+## C.1 Purpose
+
+The profile answers who is calling and on whose behalf. It does not answer who pays. A participant that exposes a tool with real operating cost has, today, two options: negotiate a bilateral contract with every counterparty, or charge nothing. The first reproduces the N×bespoke integration problem the Exchange exists to remove, one layer down in commerce. The second is not sustainable for a register, an archive or any service whose marginal cost is not zero.
+
+This annex defines how a node **declares a price**, how a caller **pays it**, and — the part that is specific to this Exchange rather than to any payment protocol — how a price is **bound to an assurance level**, so that a participant may sell a service without thereby selling it to anyone who can produce money.
+
+The underlying payment protocol is **x402** (x402 Foundation, hosted by the Linux Foundation; specification and reference implementations under Apache 2.0). This annex does not modify x402. It profiles it, and adds the identity binding that x402 deliberately leaves to the application.
+
+---
+
+## C.2 Principles
+
+These extend §2 and are read with it.
+
+### C.2.1 The Exchange does not hold funds
+
+PPPA **MUST NOT** take custody of any participant's funds, hold a participant's wallet or private key, or act as a counterparty to a payment between participants. Settlement is between payer and payee.
+
+PPPA **MAY** operate a *facilitator* — a service that verifies a signed payment authorisation and broadcasts it to the settlement network — because a facilitator does not enter into possession of the funds it settles. A participant **MUST** be free to use a different facilitator, or none.
+
+### C.2.2 A payment is consideration, not an authorisation
+
+This is the payment analogue of §2.4. A settled payment establishes that the caller has paid. It establishes nothing about who the caller is, on whose behalf it acts, or whether it is entitled to the data requested. Where a service demands an assurance level, the assurance requirement is evaluated **before** any price is quoted (C.5.3).
+
+A node **MUST NOT** treat payment as a substitute for identification, and **MUST NOT** quote a price to a caller it would refuse on identity grounds.
+
+### C.2.3 Rail neutrality
+
+This annex is written around x402 because it is currently the only mechanism that settles a sub-cent amount from a counterparty with whom no prior relationship exists. It is not a commitment to a settlement network, an asset or a facilitator. A node **MAY** declare a price payable by invoice or by any other rail, using the same declaration (C.4), and **MUST NOT** be required to hold or accept a crypto-asset in order to publish a price.
+
+### C.2.4 Price is declared, not negotiated
+
+A caller **MUST** be able to learn the price of a tool without invoking it. Discovery precedes the call.
+
+---
+
+## C.3 Roles
+
+| Role | Held by | Function |
+|---|---|---|
+| **Payee** | The participant operating the node | Sets prices. Receives settlement directly. |
+| **Payer** | The calling agent, or the principal on whose behalf it acts | Presents a signed payment authorisation. |
+| **Facilitator** | Any operator, including PPPA | Verifies the authorisation and broadcasts settlement. Never takes custody. |
+| **Exchange (PPPA)** | PPPA | Indexes declared prices (§19.2). Publishes participant status (§8). Does not price, invoice, collect or arbitrate. |
+
+A node **MUST** declare its chosen facilitator in its pricing document (C.4.2). Facilitator choice is a participant decision, on the same footing as key custody (§2.2).
+
+---
+
+## C.4 Price declaration
+
+### C.4.1 Tool annotation
+
+A paid tool **MUST** carry a price annotation in the metadata returned by `tools/list`. The annotation has two parts: the x402 payment requirement, using the field name established by the x402 ecosystem, and the Exchange binding.
+
+```jsonc
+{
+  "name": "uznemuma_pamatdati",
+  "description": "…",
+  "inputSchema": { "…": "…" },
+  "annotations": { "readOnlyHint": true, "destructiveHint": false, "idempotentHint": true },
+
+  "x-x402": {
+    "scheme": "exact",                  // exact | upto | batch-settlement
+    "network": "eip155:84532",          // CAIP-2
+    "asset": "0x…",                     // settlement asset contract
+    "maxAmountRequired": "250000",      // base units of `asset`
+    "payTo": "0x…",
+    "facilitator": "https://…/"
+  },
+
+  "x-aiexchange-pay": {
+    "minAssuranceLevel": "AL1",         // AL0 | AL1 | AL2
+    "requiresIdentify": true,
+    "personalData": true,
+    "priceDisplay": "0.25 EUR",
+    "invoiceMode": "aggregate-monthly", // per-call | aggregate-monthly | none
+    "rails": ["x402", "invoice"]
+  }
+}
+```
+
+Requirements:
+
+- A tool **without** an `x-x402` annotation is free. A node **MUST NOT** demand payment for a tool it has not declared as paid.
+- `maxAmountRequired` **MUST** be the same value the node returns in the payment envelope for that tool (C.5.1). A node **MUST NOT** quote one price in `tools/list` and demand another on call.
+- Under the `upto` scheme, `maxAmountRequired` is the ceiling; the amount actually settled **MUST NOT** exceed it.
+- `priceDisplay` is for human and accounting use and carries no protocol meaning.
+- `minAssuranceLevel` defaults to `AL0` if absent. `AL0` means an unidentified caller may pay.
+
+### C.4.2 Node pricing document
+
+A node with at least one paid tool **MUST** publish
+
+```
+GET https://mcp.{org-domain}/.well-known/aiexchange/pricing.json
+```
+
+listing every paid tool with its endpoint, its annotation, and the node's settlement configuration. The document **MUST** be signed by the node key (§4.4) and **MUST** be consistent with `tools/list` on every endpoint it describes.
+
+The document exists so that a purchasing agent can plan a budget across the Exchange without invoking anything, and so that ANS (§19.3) can index prices without calling member nodes.
+
+### C.4.3 Manifest
+
+A node with paid tools **MUST** set `payment.enabled` to `true` in its manifest (Annex A) and **MUST** give the URL of its pricing document. A node whose manifest does not declare payment **MUST NOT** return `402` on any endpoint.
+
+---
+
+## C.5 The payment exchange
+
+### C.5.1 HTTP profile (normative)
+
+Under the Streamable HTTP transport each `tools/call` is a discrete HTTP request, so the payment exchange is carried by ordinary x402 at the transport layer and no MCP-level dialect is required.
+
+1. The caller POSTs a `tools/call` for a paid tool without payment.
+2. The node responds **HTTP 402** with the x402 payment-required envelope, before the MCP transport processes the request. The response body **MUST** be a valid x402 envelope and **MUST NOT** be a JSON-RPC result.
+3. The caller repeats the request with the payment header.
+4. The node submits the authorisation to its facilitator. On verified settlement it processes the call normally and returns the JSON-RPC result. On failed verification it returns **HTTP 402** again with an error indication.
+
+A node **MUST NOT** invoke the underlying adapter before settlement is verified.
+
+### C.5.2 In-band profile (compatibility, optional)
+
+An MCP client that cannot surface a transport-level `402` to its payment logic will see a transport error. A node **MAY** additionally support an in-band form, in which the same envelope is returned as a tool result with `isError: true` and a structured payload. Where both are supported the node **MUST** select on the caller's `Accept` or an explicit request parameter, and the two **MUST** carry identical price and settlement data.
+
+The in-band profile is a compatibility measure. It is not the normative behaviour and a node **MUST NOT** offer it as the only option.
+
+### C.5.3 Precedence
+
+The order of evaluation is normative. A node **MUST** resolve identity and status before price.
+
+| # | Condition | Response |
+|---|---|---|
+| 1 | Tool is free | Normal processing |
+| 2 | Caller's participant credential is revoked or suspended (§8) | **403** `membership_revoked` |
+| 3 | Tool declares `minAssuranceLevel` above the caller's established assurance level | **403** `identity_required` — **never 402** |
+| 4 | Tool declares `personalData: true` and the caller is unidentified | **403** `identity_required` |
+| 5 | Caller is contracted for this tool with `invoiceMode: aggregate-monthly` | **200**, metered, no payment exchange |
+| 6 | Assurance satisfied, payment absent | **402** with envelope |
+| 7 | Assurance satisfied, payment present and settled | **200** |
+| 8 | Payment present, verification or settlement fails | **402** with error |
+
+Row 3 is the substance of this annex. Quoting a price to a caller who is not permitted to receive the data discloses that the data exists and invites an attempt to purchase it. A node **MUST** refuse on identity grounds without disclosing price.
+
+### C.5.4 Replay
+
+A node **MUST** reject a payment authorisation it has already settled. Settlement references **MUST** be recorded (C.6) and checked before adapter invocation.
+
+---
+
+## C.6 Metering and audit
+
+This extends §12. It does not replace it.
+
+For every call to a paid tool, whether settled, refused or free-by-contract, a node **MUST** record:
+
+| Field | Note |
+|---|---|
+| Timestamp | |
+| Endpoint and tier | As §12 |
+| Tool name | |
+| Payer identifier | Participant DID where identified; settlement account where `AL0` |
+| Assurance level established | |
+| Declared price and asset | |
+| Amount settled | Absent where refused |
+| Settlement reference | Transaction or facilitator receipt identifier |
+| Outcome | Settled, refused-identity, refused-status, failed-verification |
+
+The record **MUST** be part of the node's tamper-evident audit sequence (§12). It serves three purposes simultaneously — technical trail, billing evidence, and the accounting record from which a periodic invoice is derived (C.7) — and a node **SHOULD NOT** maintain a separate, unchained billing store.
+
+Retention follows §12. A settlement account is capable of identifying a natural person when combined with call patterns and **MUST** be treated as personal data where the payer is not a legal person.
+
+---
+
+## C.7 Settlement and invoicing
+
+Settlement of an x402 payment is between payer and payee and completes outside this profile.
+
+Where `invoiceMode` is `aggregate-monthly`, the node **MUST** be able to produce, per counterparty per period, a single statement derived from the metering record of C.6. Per-call invoicing **SHOULD NOT** be used for high-volume, low-value tools.
+
+A node that must issue a value-added-tax document for a supply to a business counterparty requires that counterparty's tax identifier, which it can obtain only from an identified party. This is a further reason to set `minAssuranceLevel` to `AL1` or above on any tool whose consideration is to be invoiced.
+
+---
+
+## C.8 Interaction with status and revocation
+
+§8 applies unchanged and fail-closed. Suspension or termination of a participant's membership removes its ability to transact across the Exchange without any change in another participant's systems: a node **MUST** evaluate the payer's status (row 2 of C.5.3) before quoting a price, and **MUST** refuse a paid call from a participant whose credential is revoked even where the caller tenders valid payment.
+
+A node **MUST NOT** settle a payment it will then refuse to honour. Where status is discovered to have lapsed after settlement, the node **SHOULD** refund and **MUST** record the outcome under C.6.
+
+---
+
+## C.9 Legally significant data
+
+§6.4 is not relaxed by this annex. A tool returning legally significant data **MUST NOT** declare `minAssuranceLevel: AL0`, and **MUST NOT** be payable by an unidentified caller at any price.
+
+---
+
+## C.10 Conformance cases (conditional suite M)
+
+These apply only to a node declaring at least one paid tool. They are additional to, and do not modify, the 36-case procedure of Annex B.5.
+
+| Case | Test | Pass |
+|---|---|---|
+| **M-01** | `tools/call` a paid `AL0` tool with no payment | HTTP **402**, well-formed x402 envelope |
+| **M-02** | Compare `tools/list` annotation with the 402 envelope | Scheme, network, asset, `payTo` and amount **identical** |
+| **M-03** | `tools/call` with a valid settled payment | **200**; adapter invoked exactly once |
+| **M-04** | Unidentified caller to a tool declaring `minAssuranceLevel: AL1` | **403** `identity_required`; **no price disclosed** |
+| **M-05** | Caller whose participant credential is revoked, tendering valid payment | **403** `membership_revoked`; no settlement attempted |
+| **M-06** | `GET /.well-known/aiexchange/pricing.json` | Present, signature verifies against the node DID, consistent with `tools/list` |
+| **M-07** | Replay a previously settled authorisation | Rejected; adapter not invoked |
+| **M-08** | `tools/call` any tool without an `x-x402` annotation | **200**; no 402 at any point |
+
+A node failing **M-04** or **M-05** **MUST NOT** be presented as conformant with this annex, irrespective of the other cases.
+
+---
+
+## C.11 Regulatory considerations (non-normative)
+
+This section is informative. It is not a legal opinion and participants are responsible for their own analysis.
+
+**Custody.** C.2.1 exists so that the Exchange does not come within the perimeter of payment or electronic-money regulation. A facilitator that verifies and broadcasts an authorisation without entering into possession of funds is generally treated differently from a service that receives and forwards them; the distinction is load-bearing and should not be eroded by convenience.
+
+**Settlement asset.** A euro-denominated asset removes a foreign-exchange leg from the accounts of a euro-area participant and is preferable where available for the target network.
+
+**Tax.** Each settled call is a supply of a service. C.6 and C.7 exist so that the metering record is sufficient evidence for a periodic tax document without a parallel billing system.
+
+**Data protection.** C.6 requires the treatment of settlement identifiers as personal data where the payer is a natural person. Note that the assurance binding of C.2.2 improves rather than worsens the data-protection position: it prevents the disclosure of personal data to an unidentified counterparty.
+
+**Product safety and AI regulation.** This annex creates no new obligation under Regulation (EU) 2024/1689. The metering record of C.6 is, however, capable of serving as part of the logging evidence a deployer is expected to keep.
 
 ---
 

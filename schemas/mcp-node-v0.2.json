@@ -137,6 +137,22 @@
       }
     },
 
+    "payment": {
+      "type": "object",
+      "description": "Annex C payment profile. Present only on a node that declares paid tools.",
+      "required": ["enabled"],
+      "additionalProperties": false,
+      "properties": {
+        "enabled": { "type": "boolean" },
+        "pricingDocument": { "type": "string", "format": "uri" },
+        "facilitator": { "type": "string", "format": "uri" },
+        "rails": {
+          "type": "array",
+          "items": { "type": "string", "enum": ["x402", "invoice"] }
+        }
+      }
+    },
+
     "updated": { "type": "string", "format": "date-time" }
   }
 }
